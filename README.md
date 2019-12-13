@@ -19,7 +19,7 @@ Self-Driving Car Engineer Nanodegree Program
   * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
   * If you install from source, checkout to commit `e94b6e1`, i.e.
     ```
-    git clone https://github.com/uWebSockets/uWebSockets 
+    git clone https://github.com/uWebSockets/uWebSockets
     cd uWebSockets
     git checkout e94b6e1
     ```
@@ -33,66 +33,36 @@ Fellow students have put together a guide to Windows set-up for the project [her
 1. Clone this repo.
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+4. Run it: `./pid`.
 
 Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
 
-## Editor Settings
+## Algorithm and tuning
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+The goal of this project is to control the steering angle of a simulated car so it will follow the road. It is also possible to control the throttle, which  found very useful.
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+### Controlling the steering angle
 
-## Code Style
+For controlling the car basic PID controller is used. The input the the PID was the distance of the car from the center of the line.
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+This type of controller has three basic terms:
+* Proportional (P) - proportional to the current value - directly reacts to changes in control value (if used alone overshoots and leads to oscillations)
+* Derivative (D) - proportional to error between current and previous value - tries to estimate future trend (used to dampen or remove the oscillation)
+* Integral (I) - proportional to sum of errors - prevents residual error
 
-## Project Instructions and Rubric
+ The biggest challenge of the project was to tune the PID parameters to get the smooth and safe trajectory. I've started to estimate the biggest P parameter when the car is still behaving in a stable way (with I and D set to 0). I found out that this value is around 0.5. Next step was to find a D parameter that will compensate for the oscillations in the system. During tests with different values I realized that the car was not turning enough when approaching the corners, which leads to overshooting. To tackle this problem I did two things: increase the P value and introduce the heuristic to control the throttle (described later).
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+ After multiple tests I found out that parameters P = 0.12 I = 0.0001 and D = 2, yield a good results. The car is still oscillating a bit, but it is not driving off the road.
 
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
+ ### Controlling the throttle
 
-## Hints!
+ During the PID tuning I realized that it's hard to follow the road when driving with the full speed. That's why I introduced the heuristic that limits the throttle depending on the current control value. The ranges that I used are based on experiments, and could potentially be improved. Another improvement might be to use the PID controller instead of the heuristics.
 
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
+ Used throttle values:
+ | CTE        | throttle           |
+| ------------- |:-------------:|
+ | < 0.5 | 0.3|
+ |0.5< CTE <0.8 | 0.15|
+ |0.8<CTE<2 | 0.1|
+ |>2 (if speed <20)|0.05|
+ |>2 (if speed >20)|-0.05|

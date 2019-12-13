@@ -32,10 +32,6 @@ string hasData(string s) {
 
 int main() {
   uWS::Hub h;
-  double p_stable = 0.05;
-  double oscilation_period = 35;
-  //PID pid(p_stable*0.8,1.2*p_stable/oscilation_period,3*oscilation_period*p_stable/40);
-  //PID pid(0.12, 0.0002, 1);
   PID pid(0.12, 0.0001, 2);
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
@@ -69,7 +65,7 @@ int main() {
                     << std::endl;
 
           double throttle;
-          if (abs(cte)<0.5) {
+          if (abs(cte)<0.5){
             throttle = 0.3;
           }
           else if(abs(cte) < 0.8){
@@ -78,10 +74,12 @@ int main() {
           else if(abs(cte) < 2){
             throttle  = 0.1;
           }
-          else if (speed>20) {
+          else if (speed>20){
             throttle = -0.05;
           }
-          else throttle = 0.05;
+          else{
+            throttle = 0.05;
+          }
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle;
