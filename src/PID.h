@@ -6,7 +6,7 @@ class PID {
   /**
    * Constructor
    */
-  PID();
+  PID(double Kp, double Ki, double Kd);
 
   /**
    * Destructor.
@@ -35,16 +35,19 @@ class PID {
   /**
    * PID Errors
    */
-  double p_error;
-  double i_error;
-  double d_error;
+  double p_error_;
+  double i_error_;
+  double d_error_;
 
+  double sum_cte;
+  double prev_cte;
+  bool initialized;
   /**
    * PID Coefficients
    */ 
-  double Kp;
-  double Ki;
-  double Kd;
+  double Kp_;
+  double Ki_;
+  double Kd_;
 };
 
 #endif  // PID_H
