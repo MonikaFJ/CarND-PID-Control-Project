@@ -32,10 +32,12 @@ string hasData(string s) {
 
 int main() {
   uWS::Hub h;
-
-  PID pid(1, 0.2, 0.002);
-
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
+  double p_stable = 0.05;
+  double oscilation_period = 35;
+  //PID pid(p_stable*0.8,1.2*p_stable/oscilation_period,3*oscilation_period*p_stable/40);
+  //PID pid(0.12, 0.0002, 1);
+  PID pid(0.12, 0.0001, 2);
+  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -63,14 +65,28 @@ int main() {
           pid.UpdateError(cte);
           steer_value = pid.TotalError();
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
+          std::cout << "CTE: " << cte << " Steering Value: " << steer_value
                     << std::endl;
 
+          double throttle;
+          if (abs(cte)<0.5) {
+            throttle = 0.3;
+          }
+          else if(abs(cte) < 0.8){
+            throttle  = 0.15;
+          }
+          else if(abs(cte) < 2){
+            throttle  = 0.1;
+          }
+          else if (speed>20) {
+            throttle = -0.05;
+          }
+          else throttle = 0.05;
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = throttle;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
       } else {
@@ -85,7 +101,7 @@ int main() {
     std::cout << "Connected!!!" << std::endl;
   });
 
-  h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code, 
+  h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code,
                          char *message, size_t length) {
     ws.close();
     std::cout << "Disconnected" << std::endl;
@@ -98,6 +114,6 @@ int main() {
     std::cerr << "Failed to listen to port" << std::endl;
     return -1;
   }
-  
+
   h.run();
 }
