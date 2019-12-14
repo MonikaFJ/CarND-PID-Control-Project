@@ -32,7 +32,7 @@ string hasData(string s) {
 
 int main() {
   uWS::Hub h;
-  PID pid(0.12, 0.0001, 2);
+  PID pid(0.13, 0.0003, 1.4);
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -52,12 +52,7 @@ int main() {
           double speed = std::stod(j[1]["speed"].get<string>());
           double angle = std::stod(j[1]["steering_angle"].get<string>());
           double steer_value;
-          /**
-           * TODO: Calculate steering value here, remember the steering value is
-           *   [-1, 1].
-           * NOTE: Feel free to play around with the throttle and speed.
-           *   Maybe use another PID controller to control the speed!
-           */
+
           pid.UpdateError(cte);
           steer_value = pid.TotalError();
           // DEBUG
@@ -66,7 +61,7 @@ int main() {
 
           double throttle;
           if (abs(cte)<0.5){
-            throttle = 0.3;
+            throttle = 0.25;
           }
           else if(abs(cte) < 0.8){
             throttle  = 0.15;

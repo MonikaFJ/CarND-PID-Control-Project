@@ -52,7 +52,7 @@ This type of controller has three basic terms:
 
  The biggest challenge of the project was to tune the PID parameters to get the smooth and safe trajectory. I've started to estimate the biggest P parameter when the car is still behaving in a stable way (with I and D set to 0). I found out that this value is around 0.5. Next step was to find a D parameter that will compensate for the oscillations in the system. During tests with different values I realized that the car was not turning enough when approaching the corners, which leads to overshooting. To tackle this problem I did two things: increase the P value and introduce the heuristic to control the throttle (described later).
 
- After multiple tests I found out that parameters P = 0.12 I = 0.0001 and D = 2, yield a good results. The car is still oscillating a bit, but it is not driving off the road.
+ After multiple tests I found out that parameters P = 0.13 I = 0.0003 and D = 1.4, yield a good results. The car is still oscillating a bit, but it is not driving off the road.
 
  ### Controlling the throttle
 
@@ -61,7 +61,7 @@ This type of controller has three basic terms:
  Used throttle values:
  | CTE        | throttle           |
 | ------------- |:-------------:|
- | < 0.5 | 0.3|
+ | < 0.5 | 0.25|
  |0.5< CTE <0.8 | 0.15|
  |0.8<CTE<2 | 0.1|
  |>2 (if speed <20)|0.05|
